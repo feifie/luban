@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}
+     业务线
+{% endblock %}
+
+{% block content %}
+
+    <h1 style="text-align: center">业务线信息</h1>
+
+    <div class="container">
+        <div>
+            <a class="btn btn-success" id="addBtn">添加</a>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>业务名称</th>
+                        <th>业务信息</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                {% for row in business_list %}
+                    <tr nid="{{ row.id }}">
+                        <td na="nid" style="display: none">{{ row.id }}</td>
+                        <td na="name">{{ row.name }}</td>
+                        <td na="note">{{ row.note }}</td>
+                        <td><a style="font-size: 25px" class="glyphicon glyphicon-trash del-row"></a>
+                            <a style="font-size: 25px" class="glyphicon glyphicon-pencil edit-row"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+            <!-- Modal add bus-->
+            <div class="modal fade" id="BusinModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加业务线</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--表单-->
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label" >业务名称</label>
+                                    <div class="col-sm-10 center">
+                                    <input id="busid" type="text" placeholder="业务线名称" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                   <label for="inputPassword3" class="col-sm-2 control-label">业务信息</label>
+                                   <div class="col-sm-10 center" >
+                                   <textarea style="width: 200px;height: 100px"id="bustext"></textarea>
+                                   </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <span id="errorMsg" style="color: red"></span>
+                            <button type="button" class="btn btn-default center" data-dismiss="modal" id="quit">取消</button>
+                            <button type="button" class="btn btn-primary center" id="addBus">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end bus-->
+
+            <!-- Modal edit bus-->
+            <div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel" style="text-align: center">修改业务线信息</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--表单-->
+                            <form class="form-horizontal">
+
+                                <input id="euid" type="text" name="nid" style="display:none;">
+
+                                <div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label" >业务名称</label>
+                                    <div class="col-sm-10 center">
+                                    <input name="name" id="uname" type="text" placeholder="业务线名称" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                   <label for="inputPassword3" class="col-sm-2 control-label">业务信息</label>
+                                   <div class="col-sm-10 center" >
+                                   <textarea name="note" style="width: 200px;height: 100px"id="ebustext"></textarea>
+                                   </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <span id="errorMsg" style="color: red"></span>
+                            <button type="button" class="btn btn-default center" data-dismiss="modal" id="quit">取消</button>
+                            <button type="button" class="btn btn-primary center" id="SaveBus">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end edit bus-->
+
+            <!-- Modal del bus-->
+            <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="alert alert-danger" role="alert">
+                        <h3 style="text-align: center">确定要删除该业务线吗？</h3>
+                        <div id="delNid">......</div>
+                        <div style="text-align: center">
+                            <button id="cacle" type="button" class="btn btn-primary">取消</button>
+                            <button id="delConfirm" type="button" class="btn btn-danger">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end bus-->
+
+    <div>
+        <script src="/static/js/jquery-2.1.1.min.js"></script>
+        <script>
+
+            $(function () {
+                bindEdit();
+            });
+
+            $('#addBtn').click(function(){
+                $('#BusinModal').modal('show')
+            });
+
+            $('#addBus').click(function(){
+                postData = {};
+                var bid = $('#busid').val();
+                postData['bid']=bid;
+                var bustext = $('#bustext').val();
+                postData['bustext']=bustext;
+                console.log(postData);
+                //发送到后端
+                $.ajax({
+                    url:'/Business_Json/',
+                    type:'POST',
+                    data:postData,
+                    success: function (arg) {
+                        console.log(arg);
+                        var data = JSON.parse(arg);
+                        if(data.status){
+                            $('#BusinModal').modal('hide');
+                            window.location.reload();
+                        }else{
+                            $('#errorMsg').text(data.message)
+                        }
+                    }
+                })
+
+            });
+
+            $('.del-row').click(function(){
+                //调用警告框
+                $('#delModal').modal('show');
+                 //获取当前行的ID
+                var rowId = $(this).parent().parent().attr('nid');
+                //设置给delNid
+                $('#delNid').val(rowId);
+                console.log(rowId)
+            });
+
+            $('#delConfirm').click(function(){
+                //获取businessid
+                var rowId = $('#delNid').val();
+                console.log(rowId);
+                $.ajax({
+                    url:'/Business_del_Json/',
+                    type:'POST',
+                    data:{'nid':rowId},
+                    success: function (arg) {
+                        console.log(arg);
+                        data = JSON.parse(arg);
+                        if(data.status){
+                            $('#delModal').modal('hide');
+                            window.location.reload();
+                        }else{
+                            alert(data.message)
+                        }
+                    }
+                })
+            });
+
+            $('#cacle').click(function(){
+                $('#delModal').modal('hide');
+            });
+
+            function bindEdit(){
+                //使用委托的方式
+                $('#tb').on('click','.edit-row',function(){
+                    $('#EditModal').modal('show');
+                    //获取当前行的所有数据
+                    $(this).parent().prevAll().each(function(){
+                        var v = $(this).text();
+                        var n = $(this).attr('na');
+                        console.log(v);
+                        console.log(n);
+                        //将数据赋值到对应的对话框的指定位置
+                        if(n=='note'){
+                            $("#EditModal textarea[name='"+ n +"']").val(v)
+                        }else{
+                            $("#EditModal input[name='"+ n +"']").val(v)
+                        }
+                    });
+                })
+            }
+
+            $('#SaveBus').click(function () {
+                //获取修改的值
+                postData = {};
+                var uid = $('#euid').val();
+                postData['uid']=uid;
+                var name = $('#uname').val();
+                postData['name'] = name;
+                var bustext = $('#ebustext').val();
+                postData['bustext'] = bustext;
+                console.log(postData);
+                $.ajax({
+                    url:'/Business_edit_Json/',
+                    type:'POST',
+                    data:postData,
+                    success: function (arg) {
+                        console.log(arg);
+                        data = JSON.parse(arg);
+                        if(data.status){
+{#                            alert(data.message)#}
+                            window.location.reload()
+                        }else{
+                            alert(data.message)
+                        }
+                    }
+                })
+            })
+
+
+
+        </script>
+    </div>
+
+    </div>
+
+{% endblock %}

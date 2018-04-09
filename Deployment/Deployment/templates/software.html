@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    软件管理
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <div>
+            <a class="btn btn-success" id="AddSoftBtn">添加</a>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>服务名称</th>
+                        <th>软件名称</th>
+                        <th>软件描述</th>
+                        <th>存储位置</th>
+                        <th style="display: none">部署命令</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                    {% for row in sof %}
+                    <tr nid="{{ row.id }}">
+                        <td na="nid"style="display: none">{{ row.id }}</td>
+                        <td na="name">{{ row.name }}</td>
+                        <td na="softname">{{ row.softname }}</td>
+                        <td na="note">{{ row.note }}</td>
+                        <td na="software">{{ row.software }}</td>
+                        <td na="commands" style="display: none">{{ row.commands }}</td>
+                        <td><a style="font-size: 25px" class="glyphicon glyphicon-trash del-row"></a>
+                            <a style="font-size: 25px" class="glyphicon glyphicon-pencil edit-row"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal add software-->
+        <div class="modal fade" id="addsoftModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加软件</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <!--表单-->
+                        <form class="form-horizontal center">
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">服务名称</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="ServName">
+                                </div>
+                            </div>
+{#                            <div class="form-group">#}
+{#                                <label for="inputPassword3" class="col-sm-2 control-label">软件名称</label>#}
+{#                                <div class="col-sm-10">#}
+{#                                <input type="text" id="SoftName">#}
+{#                                </div>#}
+{#                            </div>#}
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">软件上传</label>
+                               <div class="col-sm-10 center" >
+                               <input type="file" id="SoftFile">
+                               </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">部署命令</label>
+                                <div class="col-sm-10">
+                                <textarea style="width: 300px;height: 600px" id="SoftCmd" placeholder="支持复制粘贴"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="SoftErrorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="BtnSoftSave">加入软件库</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end software-->
+
+        <!-- Modal start edit software-->
+        <div class="modal fade" id="EditsoftModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">编辑软件</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <!--表单-->
+                        <form class="form-horizontal center">
+                            <input name="nid" type="text" id="sid" >
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">服务名称</label>
+                                <div class="col-sm-10">
+                                <input name="name" type="text" id="EditServName">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">描述</label>
+                                <div class="col-sm-10">
+                                <input name="note" type="text" id="EditNote">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">软件位置</label>
+                               <div class="col-sm-10 center" >
+                               <input name="software" type="text" id="editSoftFile" disabled>
+                               </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">部署命令</label>
+                                <div class="col-sm-10">
+                                <textarea name="commands" style="width: 300px;height: 400px" id="EditSoftCmd"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="SoftErrorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="BtnEditSoftSave">入库</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end  edit software-->
+
+
+        <!-- Modal start del software-->
+        <div class="modal fade" id="DelSoftModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-danger" role="alert">
+                    <h3 style="text-align: center">确定要删除该代码吗？</h3>
+                    <div id="delsid">......</div>
+                    <div style="text-align: center">
+                        <button id="delcacle" type="button" class="btn btn-primary">取消</button>
+                        <button id="delSoftbtn" type="button" class="btn btn-danger">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end del software-->
+
+
+        <div class="center" style="color: red">
+            <li>在编辑命令的时候，为了减少输出，请尽量使用重定向命令如：yum -y install gcc* > null</li>
+            <li>为了保证命令可以顺序执行，尽量使用&&，如 cd /data && tar zxf abc.tar.gz</li>
+            <li>最后请输入一个可以检测服务器是否启动成功的检测命令，并确保能够回显如 netstat -ntpl | grep nginx</li>
+        </div>
+
+
+    </div>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+        $(function () {
+                bindEdit();
+            });
+
+        $('#AddSoftBtn').click(function () {
+            $('#addsoftModal').modal('show')
+        });
+
+        $('#BtnSoftSave').click(function () {
+            //获取表单中的数据
+            var data = new FormData();
+            var ServName = $('#ServName').val();
+            var SoftCmd = $('#SoftCmd').val();
+            data.append('ServName',ServName);
+            data.append('SoftCmd',SoftCmd);
+            data.append('SoftFile',document.getElementById('SoftFile').files[0]);
+            console.log(data);
+
+            $.ajax({
+                url:'/Soft_SendFilesJson/',
+                type:'POST',
+                data:data,
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if(data.status){
+                        window.location.reload();
+                        console.log(arg)
+                    }else{
+                        $('#SoftErrorMsg').text(data.message);
+                        console.log(arg)
+                    }
+
+                },
+                processData: false,
+                contentType: false,
+            })
+        });
+
+        $('.del-row').click(function(){
+            //调用警告框
+            $('#DelSoftModal').modal('show');
+             //获取当前行的ID
+            var rowId = $(this).parent().parent().attr('nid');
+            //设置给delsid
+            $('#delsid').val(rowId);
+            console.log(rowId)
+        });
+
+        $('#delSoftbtn').click(function(){
+            //获取businessid
+            var sid = $('#delsid').val();
+            console.log(sid);
+            $.ajax({
+                url:'/Soft_DelFilesJson/',
+                type:'POST',
+                data:{'nid':sid},
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if(data.status){
+                        $('#delModal').modal('hide');
+                        window.location.reload();
+                    }else{
+                        alert(data.message)
+                    }
+                }
+            })
+        });
+
+        $('#delcacle').click(function(){
+            $('#DelSoftModal').modal('hide');
+        });
+
+        function bindEdit(){
+            //使用委托的方式
+            $('#tb').on('click','.edit-row',function(){
+                $('#EditsoftModal').modal('show');
+                //获取当前行的所有数据
+                $(this).parent().prevAll().each(function(){
+                    var v = $(this).text();
+                    var n = $(this).attr('na');
+                    console.log(v);
+                    console.log(n);
+                    //将数据赋值到对应的对话框的指定位置
+                    if(n=='commands'){
+                        $("#EditsoftModal textarea[name='"+ n +"']").val(v)
+                    }else{
+                        $("#EditsoftModal input[name='"+ n +"']").val(v)
+                    }
+                });
+            })
+        }
+
+        //编辑入库
+        $('#BtnEditSoftSave').click(function () {
+            postData = {};
+            var sid = $('#sid').val();
+            postData['sid']=sid;
+            var name = $('#EditServName').val();
+            postData['name']=name;
+            var note = $('#EditNote').val();
+            postData['note']=note;
+            var commands = $('#EditSoftCmd').val();
+            postData['cmd']=commands;
+            console.log(postData);
+            //发送到后端
+            $.ajax({
+                url: '/Soft_Edit_Json/',
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if (data.status) {
+                        alert(data.message);
+                        window.location.reload()
+                    } else {
+                        alert(data.message)
+                    }
+                }
+            })
+
+        })
+
+    </script>
+
+
+{% endblock %}
+

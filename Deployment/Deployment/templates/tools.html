@@ -1,0 +1,274 @@
+{% extends  'base.html' %}
+
+{% block title %}
+    脚本工具维护
+{% endblock %}
+
+{% block content %}
+    <!--content-->
+    <div class="container">
+        <!--按钮-->
+        <div>
+            <a class="btn btn-danger" id="addBtn">增加</a>
+        </div>
+
+        <!--start table-->
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>名称</th>
+                        <th class="center">功能简介</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                    {% for t in t_list %}
+                    <tr nid="{{ t.id }}">
+                        <td na="nid" style="display: none">{{ t.id }}</td>
+                        <td na="name">{{ t.name }}</td>
+                        <td na="note">{{ t.note }}</td>
+                        <td na="script" style="display: none">{{ t.script }}</td>
+                        <td><a style="font-size: 25px" class="glyphicon glyphicon-trash del-row"></a>
+                            <a style="font-size: 25px" class="glyphicon glyphicon-pencil edit-row"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!--end table-->
+
+        <!-- Modal add modal-->
+        <div class="modal fade" id="ScriptModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加功能脚本</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <!--表单-->
+                        <form class="form-horizontal">
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label" >脚本名称</label>
+                                <div class="col-sm-10 center">
+                                <input id="sname" type="text" placeholder="脚本名称" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">编写脚本</label>
+                               <div class="col-sm-10 center" >
+                               <textarea style="width: 300px;height: 600px" id="stext" placeholder="支持复制粘贴"></textarea>
+                               </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">备注</label>
+                               <div class="col-sm-10 center" >
+                               <textarea style="width: 200px;height: 100px"id="sntext"></textarea>
+                               </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="errorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default center" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary center" id="addsBtn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end model-->
+
+        <!-- Modal  start edit modal-->
+        <div class="modal fade" id="ScriptEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">编辑功能脚本</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <!--表单-->
+                        <form class="form-horizontal">
+                            <input type="text" name="nid" id="nid" style="display: none">
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label" >脚本名称</label>
+                                <div class="col-sm-10 center">
+                                <input name="name" id="name" type="text" placeholder="脚本名称" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">编写脚本</label>
+                               <div class="col-sm-10 center" >
+                               <textarea name="script" style="width: 300px;height: 400px" id="script"></textarea>
+                               </div>
+                            </div>
+                            <div class="form-group">
+                               <label for="inputPassword3" class="col-sm-2 control-label">备注</label>
+                               <div class="col-sm-10 center" >
+                               <textarea name="note" style="width: 200px;height: 100px"id="note"></textarea>
+                               </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="EditerrorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default center" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary center" id="EditBtn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal  end  edit model-->
+
+        <!-- Modal  start del script-->
+        <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-danger" role="alert">
+                    <h3 style="text-align: center">确定要删除该脚本吗？</h3>
+                    <div id="delNid">......</div>
+                    <div style="text-align: center">
+                        <button id="cacle" type="button" class="btn btn-primary">取消</button>
+                        <button id="delConfirm" type="button" class="btn btn-danger">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end del script-->
+
+    </div>
+    <!--end - content-->
+
+    <!--start js-->
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+        $(function () {
+                bindEdit();
+            });
+
+        $('#addBtn').click(function () {
+            $('#ScriptModal').modal('show');
+        });
+        //添加脚本
+        $('#addsBtn').click(function () {
+            postData = {};
+            var sname = $('#sname').val();
+            postData['name']=sname;
+            var script = $('#stext').val();
+            postData['script']=script;
+            var snote = $('#sntext').val();
+            postData['snote']=snote;
+            console.log(postData);
+            //发送到后端
+            $.ajax({
+                url: '/Tools_SendScriptJson/',
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    data = JSON.parse(arg);
+                    if(data.status){
+                        window.location.reload();
+                        console.log(data.message)
+                    }else{
+                        $('#errorMsg').text(data.message);
+                    }
+                }
+            })
+
+        });
+        //删除脚本
+        $('.del-row').click(function(){
+            $('#delModal').modal('show');
+             //获取当前行的ID
+            var rowId = $(this).parent().parent().attr('nid');
+            //设置给delNid
+            $('#delNid').val(rowId);
+            console.log(rowId)
+        });
+
+        $('#delConfirm').click(function(){
+            //获取businessid
+            var rowId = $('#delNid').val();
+            console.log(rowId);
+            $.ajax({
+                url:'/Tools_Del_ScriptJson/',
+                type:'POST',
+                data:{'nid':rowId},
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if(data.status){
+                        $('#delModal').modal('hide');
+                        window.location.reload();
+                    }else{
+                        alert(data.message)
+                    }
+                }
+            })
+        });
+
+        $('#cacle').click(function(){
+                $('#delModal').modal('hide');
+            });
+
+        function bindEdit(){
+                //使用委托的方式
+                $('#tb').on('click','.edit-row',function(){
+                    $('#ScriptEditModal').modal('show');
+                    //获取当前行的所有数据
+                    $(this).parent().prevAll().each(function(){
+                        var v = $(this).text();
+                        var n = $(this).attr('na');
+                        console.log(v);
+                        console.log(n);
+                        //将数据赋值到对应的对话框的指定位置
+                        if(n=='note'){
+                            $("#ScriptEditModal textarea[name='"+ n +"']").val(v)
+                        }else if(n=='script'){
+                            $("#ScriptEditModal textarea[name='"+ n +"']").val(v)
+                        }else{
+                            $("#ScriptEditModal input[name='"+ n +"']").val(v)
+                        }
+                    });
+                })
+            }
+
+        $('#EditBtn').click(function () {
+            postData = {};
+            var nid = $('#nid').val();
+            postData['nid']=nid;
+            var name = $('#name').val();
+            postData['name']=name;
+            var script = $('#script').val();
+            postData['script']=script;
+            var note = $('#note').val();
+            postData['note']=note;
+            console.log(postData);
+            $.ajax({
+                url: '/Tools_Edit_ScriptJson/',
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if (data.status) {
+                        {#                            alert(data.message)#}
+                        window.location.reload()
+                    } else {
+                        alert(data.message)
+                    }
+                }
+            })
+        })
+
+    </script>
+    <!--end js-->
+
+
+{% endblock %}

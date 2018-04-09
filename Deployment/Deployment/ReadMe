@@ -1,0 +1,149 @@
+
+
+
+centos 6.8 部署python3 django 环境
+
+1. 安装python3 和sqlite
+  # 注意如果在编译python 的时候没有安装sqlite，可能需要重新编译python3
+  yum install -y sqlite-devel
+  #安装python3,不影响自身的python2
+  yum install openssl-devel
+  wget https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz
+  tar zxvf Python-3.5.1.tgz
+  cd Python-3.5.1/
+  ./configure --prefix=/data/python3
+  make
+  make altinstall
+  python程序的执行文件：/usr/local/bin/python3.5
+  python应用程序目录：/usr/local/lib/python3.5
+  pip的执行文件：/usr/local/bin/pip3.5
+  设置环境变量：
+  vim /etc/profile
+  export PYTHON_HOME=/data/python3
+  export PATH=$PATH:$PYTHON_HOME/bin
+  source /etc/profile
+
+2. 安装需要的python模块
+   pip3.5 install --upgrade pip
+   pip3.5 install uwsgi
+   pip3.5 install paramiko
+   pip3.5 install django==1.11.8
+
+3. 安装nginx
+   yum install -y epel-release
+   yum -y install nginx
+
+4. 编辑测试文件
+   vim test.py
+# test.py
+def application(env, start_response):
+    start_response('200 OK', [('Content-Type','text/html')])
+    return [b"Hello World"] # python3
+    #return ["Hello World"] # python2
+   测试命令：（此处如果使用root账户会有警告！）
+   uwsgi --http :8000 --wsgi-file test.py
+
+   在浏览器上输入:http://ip:8000 能看到Hello World即表示成功！
+
+5.  将项目上传到linux系统目录中如：/data/项目
+    命令行启动：
+    uwsgi --http :8000 --wsgi-file /data/项目/wsgi.py
+
+    修改项目配置文件：
+    vim settings.py
+    #DEBUG = True
+    DEBUG = False   # 关闭debug模式
+
+    ALLOWED_HOSTS = ['*']  # 允许所有主机访问
+
+
+6. 在项目下创建一个脚本目录，用来创建脚本：
+   mkdir script
+   cd script
+   vim django_uwsgi.ini
+
+[uwsgi]
+http = :9000
+
+#the local unix socket file than commnuincate to Nginx
+
+socket = 127.0.0.1:8001
+
+# the base directory (full path)
+chdir = /data/Django/Deployment
+# Django's wsgi file
+wsgi-file = Deployment/wsgi.py
+# maximum number of worker processes
+processes = 4
+#thread numbers startched in each worker process
+threads = 2
+
+#monitor uwsgi status
+stats = 127.0.0.1:9191
+# clear environment on exit
+vacuum          = true
+
+7. 从配置文件启动：
+   # 注意不要使用root用户启动
+   uwsgi django_uwsgi.ini
+
+   通过netstat -ntpl
+   查看端口是否启动（此时，应该可以访问，但是没有静态文件，静态文件配置在nginx中）
+
+8. 配置nginx
+
+server {
+    listen       80 ;
+    server_name  localhost;
+    charset     utf-8;
+    #root         /usr/share/nginx/html;
+
+    client_max_body_size 500M;
+
+
+    # Django 的static和 media目录
+    # 如果没有static或media目录，你需要先创建
+
+    location /static {
+        alias /data/Django/Deployment/static;
+        #alias /data/Django/Deployment/static;
+    }
+
+    location /CodeDB  {
+        alias /data/Django/Deployment/CodeDB;
+    }
+
+    # Load configuration files for the default server block.
+    include /etc/nginx/default.d/*.conf;
+
+    location / {
+        include uwsgi_params;
+        uwsgi_pass  127.0.0.1:8001;
+    }
+
+    error_page 404 /404.html;
+        location = /40x.html {
+    }
+
+    error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+    }
+
+}
+
+
+9.检查nginx配置文件：
+yum的nginx
+service nginx configtest
+service nginx start
+
+
+tar nginx
+nginx -t
+service nginx start
+
+配置完成！
+
+
+
+

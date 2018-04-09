@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    代码管理
+{% endblock %}
+
+{% block content %}
+<div class="calendar">
+
+    <div>
+        <div>
+            <h3 class="center">SQL代码管理</h3>
+        </div>
+        <div>
+            <a class="btn btn-danger btn-xs" id="addsql">增加</a>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>代码名称</th>
+                        <th>所属业务</th>
+                        <th class="center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for s in sql_list %}
+                    <tr nid="{{ s.id }}">
+                        <td id="sid" style="display: none">{{ s.id }}</td>
+                        <td>{{ s.name }}</td>
+                        <td>{{ s.business.name }}</td>
+                        <td class="center">
+                            <a class="glyphicon glyphicon-eye-open"></a>
+                            <a class="glyphicon glyphicon-trash del-row1 "></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div>
+
+        <div>
+            <h3 class="center">CODES代码管理</h3>
+        </div>
+
+        <div>
+            <div>
+            <a class="btn btn-danger btn-xs" id="addcode">增加</a>
+        </div>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>代码名称</th>
+                        <th>所属业务</th>
+                        <th class="center">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for c in code_list %}
+                    <tr cid="{{ c.id }}">
+                        <td>{{ c.name }}</td>
+                        <td>{{ c.business.name }}</td>
+                        <td class="center">
+                            <a class="glyphicon glyphicon-trash del-row2"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal add code-->
+    <div class="modal fade" id="codeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加代码</h4>
+                </div>
+                <div class="modal-body">
+
+                    <!--表单-->
+                    <form class="form-horizontal center">
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">代码名称</label>
+                            <div class="col-sm-10">
+                            <input type="text" id="codesName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                           <label for="inputPassword3" class="col-sm-2 control-label">代码上传</label>
+                           <div class="col-sm-10 center" >
+                           <input type="file" id="InputFile">
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <label for="inputPassword3" class="col-sm-2 control-label">所属业务</label>
+                           <div class="col-sm-10 center" >
+                           <select id="busid">
+                               {% for b in business_list %}
+                               <option buid="{{ b.id }}"> {{ b.name }}</option>
+                               {% endfor %}
+                           </select>
+                           </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="CodeErrorMsg" style="color: red"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                    <button type="button" class="btn btn-primary" id="BtnCodesSave">加入代码库</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end code-->
+
+
+    <!-- Modal add sql-->
+    <div class="modal fade" id="sqlModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加SQL代码</h4>
+                </div>
+                <div class="modal-body">
+
+                    <!--表单-->
+                    <form class="form-horizontal center">
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">SQL名称</label>
+                            <div class="col-sm-10">
+                            <input type="text" id="sqlname">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                           <label for="inputPassword3" class="col-sm-2 control-label">写入代码</label>
+                           <div class="col-sm-10 center" >
+                           <textarea style="width: 400px;height: 600px" id="sqlcode"></textarea>
+                           </div>
+                        </div>
+                        <div class="form-group">
+                           <label for="inputPassword3" class="col-sm-2 control-label">所属业务</label>
+                           <div class="col-sm-10 center" >
+                           <select id="busSqlid">
+                               {% for b in business_list %}
+                               <option buSqlid="{{ b.id }}"> {{ b.name }}</option>
+                               {% endfor %}
+                           </select>
+                           </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="SqlErrorMsg" style="color: red"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                    <button type="button" class="btn btn-primary" id="BtnSqlSave">加入SQL代码库</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end sql-->
+
+    <!-- Modal del sql-->
+    <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="alert alert-danger" role="alert">
+                <h3 style="text-align: center">确定要删除该SQL吗？</h3>
+                <div id="delNid">......</div>
+                <div style="text-align: center">
+                    <button id="cacle" type="button" class="btn btn-primary">取消</button>
+                    <button id="delConfirm" type="button" class="btn btn-danger">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end bus-->
+
+    <!-- Modal del codes-->
+    <div class="modal fade" id="delcodesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="alert alert-danger" role="alert">
+                <h3 style="text-align: center">确定要删除该代码吗？</h3>
+                <div id="delCid">......</div>
+                <div style="text-align: center">
+                    <button id="delcacle" type="button" class="btn btn-primary">取消</button>
+                    <button id="delCode" type="button" class="btn btn-danger">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end bus-->
+
+</div>
+
+
+
+<script src="/static/js/jquery-2.1.1.min.js"></script>
+<script>
+    $('#addcode').click(function(){
+        $('#codeModal').modal('show');
+    });
+
+    $('#addsql').click(function(){
+        $('#sqlModal').modal('show');
+    });
+
+    //发送codes到后端，并入库
+    $('#BtnCodesSave').click(function () {
+        //索引0代表上传的文件内容
+        //document.getElementById('InputFile').files[0]
+        var data = new FormData();
+        var codesname = $('#codesName').val();
+        //获取业务线id
+        var busid = $('#busid').find("option:selected").attr('buid');
+        //var busid = $('#busid').find("option:selected").val();
+        console.log(busid);
+        data.append('codesname',codesname);
+        data.append('busid',busid);
+        data.append('codefile',document.getElementById('InputFile').files[0]);
+
+        $.ajax({
+            url:'/Codes_SendFilesJson/',
+            type:'POST',
+            data:data,
+            success: function (arg) {
+                console.log(arg);
+                data = JSON.parse(arg);
+                if(data.status){
+                    window.location.reload();
+{#                    $('#codeModal').modal('hide');#}
+{#                    console.log(arg)#}
+                }else{
+                    $('#CodeErrorMsg').text(data.message);
+{#                    console.log(arg)#}
+                }
+
+            },
+            processData: false,
+            contentType: false,
+        })
+    });
+    //发送sql到后端，并入库
+    $('#BtnSqlSave').click(function () {
+        postData={};
+        var sqlname= $('#sqlname').val();
+        postData['sqlname']=sqlname;
+        var sqlcode = $('#sqlcode').val();
+        postData['sqlcode']=sqlcode;
+        var buid = $('#busSqlid').find("option:selected").attr('buSqlid');
+        postData['buid']=buid;
+        console.log(postData);
+        $.ajax({
+            url:'/Codes_SendSqlJson/',
+            type:'POST',
+            data:postData,
+            success: function (arg) {
+                console.log(arg);
+                data = JSON.parse(arg);
+                if(data.status){
+                    window.location.reload()
+                }else{
+                    alert(data.message)
+                }
+            }
+        })
+
+    });
+
+    $('.del-row1').click(function(){
+        //调用警告框
+        $('#delModal').modal('show');
+         //获取当前行的ID
+        var rowId = $(this).parent().parent().attr('nid');
+        //设置给delNid
+        $('#delNid').val(rowId);
+        console.log(rowId)
+    });
+
+    $('#delConfirm').click(function(){
+        //获取businessid
+        var rowId = $('#delNid').val();
+        console.log(rowId);
+        $.ajax({
+            url:'/Codes_del_SqlJson/',
+            type:'POST',
+            data:{'nid':rowId},
+            success: function (arg) {
+                console.log(arg);
+                data = JSON.parse(arg);
+                if(data.status){
+                    $('#delModal').modal('hide');
+                    window.location.reload();
+                }else{
+                    alert(data.message)
+                }
+            }
+        })
+    });
+
+    $('#cacle').click(function(){
+        $('#delModal').modal('hide');
+    });
+
+    $('.del-row2').click(function(){
+       //调用警告框
+        $('#delcodesModal').modal('show');
+         //获取当前行的ID
+        var cid = $(this).parent().parent().attr('cid');
+        //设置给delNid
+        $('#delCid').val(cid);
+        console.log(cid)
+    });
+
+    $('#delCode').click(function () {
+        var csid = $('#delCid').val();
+        console.log(csid);
+        $.ajax({
+            url:'/Codes_del_CodJson/',
+            type:'POST',
+            data:{'nid':csid},
+            success: function (arg) {
+                console.log(arg);
+                data = JSON.parse(arg);
+                if(data.status){
+                    $('#delcodesModal').modal('hide');
+                    window.location.reload();
+                }else{
+                    alert(data.message)
+                }
+            }
+        })
+
+    });
+
+    $('#delcacle').click(function(){
+       $('#delcodesModal').modal('hide');
+    })
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    脚本测试页面
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<div class="center">
+    <div>
+        <a class="btn btn-info" id="btnAll">全 选</a>
+        <a class="btn btn-info" id="btnreverse">反 选</a>
+        <a class="btn btn-info" id="btncall">取 消</a>
+        <a class="btn btn-info" id="selscript">选择脚本</a>
+    </div>
+    <div>
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>选项</th>
+                <th>服务器名称</th>
+                <th>业务线</th>
+            </tr>
+            </thead>
+            <tbody id="tb">
+            {% for row in serv_list %}
+                <tr id="hall">
+                    <td><input type="checkbox" name="checkbox" hl="{{ row.id }}"></td>
+                    <td>{{ row.hostname }}</td>
+                    <td>{{ row.business.name }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="center alert alert-success" role="alert" style="display: none" id="success1">
+            <p id="message"></p>
+        </div>
+        <div class="alert alert-danger" role="alert" style="display: none" id="success2">
+            <p id="cboxerror"></p>
+        </div>
+    </div>
+
+    <!-- Modal add script-->
+    <div class="modal fade" id="scriptModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel" style="text-align: center">选择要执行的工具</h4>
+                </div>
+                <div class="modal-body">
+
+                    <!--表单-->
+                    <form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="inputPassword3" class="col-sm-2 control-label">脚本</label>
+                            <div class="col-sm-10">
+                                <select class="form-control" id="selejid">
+                                    {% for t in sert_list%}
+                                        <option jid="{{ t.id }}">{{ t.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <span id="errorMsg" style="color: red"></span>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                    <button type="button" class="btn btn-danger" id="BtnScriptrun">执行脚本</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal end idc-->
+
+
+</div>
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+        $('#btnAll').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', true);
+            });
+        });
+
+        $('#btncall').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', false);
+            });
+        });
+
+        $('#btnreverse').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                if ($(this).prop('checked')) {
+                    $(this).prop('checked', false);
+                } else {
+                    $(this).prop('checked', 'true');
+                }
+            });
+
+        });
+
+        $('#selscript').click(function () {
+            $('#scriptModal').modal('show');
+{#            if($("input[type='checkbox']").prop('checked')){#}
+{#                $('#scriptModal').modal('show')#}
+{#            }else{#}
+{#                alert('请先选中主机在进行操作')#}
+{#            }#}
+        });
+
+        $('#BtnScriptrun').click(function () {
+            $('#message').empty();
+            $('#cboxerror').empty();
+            postData = {};
+            //获取脚本sid
+            var sid = $("#selejid").find("option:selected").attr('jid');
+            postData['sid']=sid;
+            //获取选中的主机
+            $('#tb').find(':checked').each(function () {
+                postData['hosts'] = $(this).attr('hl');
+                console.log(postData);
+                $.ajax({
+                    url:'/Tools_Run_ScriptJson/',
+                    data:postData,
+                    type:'POST',
+                    success:function(args){
+                        console.log(args);
+                        var data = JSON.parse(args);
+                        if(data.status){
+                            $('#scriptModal').modal('hide');
+                            $('#success1').show();
+                            $('#message').append("<li id='msg1'>"+data.message+"</li>");
+                        }else{
+                            $('#scriptModal').modal('hide');
+                            $('#success2').show();
+                            $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                })
+            })
+        });
+
+
+
+    </script>
+
+
+{% endblock %}

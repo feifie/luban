@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    用户管理
+{% endblock %}
+
+{% block content %}
+    <div class="calendar">
+         <!--add btn-->
+        <div>
+            <a class="btn btn-danger btn-xs" id="adduser">增加</a>
+        </div>
+        <!--end btn-->
+        <!--table-->
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>邮箱</th>
+                        <th>电话</th>
+                        <th>微信</th>
+                        <th class="center">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                {% for u in user_list %}
+                    <tr  uid="{{ u.id }}">
+                        <td style="display: none" na="id">{{ u.id }}</td>
+                        <td na="name">{{ u.name }}</td>
+                        <td na="email">{{ u.email }}</td>
+                        <td na="mobile">{{ u.mobile }}</td>
+                        <td na="wiexin">{{ u.wiexin }}</td>
+                        <td class="center">
+                            <a class="glyphicon glyphicon-trash del-row"></a>
+                            <a class="glyphicon glyphicon-pencil edit-row "></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!--end btn-->
+
+        <!-- Modal add user-->
+        <div class="modal fade" id="AddUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加人员</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--表单-->
+                        <form class="form-horizontal center">
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">名称</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="name">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">邮箱</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="email">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">电话</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="mobile">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">微信</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="wiexin">
+                                </div>
+                            </div>
+                        </form>
+                        <!-- 表单 end-->
+                    </div>
+
+                    <div class="modal-footer">
+                        <span id="errorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnSave">增加帮手</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end user-->
+
+        <!-- Modal edit user-->
+        <div class="modal fade" id="EditUserModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">修改用户信息</h4>
+                    </div>
+                    <div class="modal-body">
+                        <!--表单-->
+                        <form class="form-horizontal center">
+
+                            <input id="uid" name="id" type="text" style="display: none">
+
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">名称</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="uname" name="name">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">邮箱</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="uemail" name="email">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">电话</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="umobile" name="mobile">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-2 control-label">微信</label>
+                                <div class="col-sm-10">
+                                <input type="text" id="uwiexin" name="wiexin">
+                                </div>
+                            </div>
+                        </form>
+                        <!-- 表单 end-->
+                    </div>
+
+                    <div class="modal-footer">
+                        <span id="user_errorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="BtnEditSave">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end user-->
+
+    </div>
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+        $(function () {
+                bindEdit();
+            });
+
+        $('#adduser').click(function(){
+            $('#AddUserModal').modal('show')
+        });
+
+        $('#btnSave').click(function(){
+            $('#errorMsg').text('');
+            //获取模态对话框数据
+            postData={};
+            var name = $('#name').val();
+            var email = $('#email').val();
+            var mobile = $('#mobile').val();
+            var wiexin = $('#wiexin').val();
+            postData['name']=name;
+            postData['email']=email;
+            postData['mobile']=mobile;
+            postData['wiexin']=wiexin;
+            console.log(postData);
+            //发送到后端
+            $.ajax({
+                url:'/Send_UserManageJson/',
+                type: 'POST',
+                data: postData,
+                success:function(arg){
+                    console.log(arg);
+                    data=JSON.parse(arg);
+                    if(data.status){
+                        $('#AddUserModal').modal('hide');
+                        window.location.reload()
+                    }else{
+                        $('#errorMsg').text(data.message);
+                    }
+                }
+            });
+
+        });
+
+        $('.del-row').click(function(){
+            postUid={};
+            var uid = $(this).parent().parent().attr('uid');
+            postUid['uid']=uid;
+            $.ajax({
+                url:'/del_user/',
+                type:'POST',
+                data:postUid,
+                success: function (arg) {
+                    console.log(arg);
+                    var dict = JSON.parse(arg);
+                    if(dict.status){
+                        //刷新页面
+                        window.location.reload();
+                    }else{
+                        alert(dict.message)
+                    }
+                }
+            })
+        });
+
+        function bindEdit(){
+                //使用委托的方式
+                $('#tb').on('click','.edit-row',function(){
+                    $('#EditUserModal').modal('show');
+                    //获取当前行的所有数据
+                    $(this).parent().prevAll().each(function(){
+                        var v = $(this).text();
+                        var n = $(this).attr('na');
+                        console.log(v);
+                        console.log(n);
+                        //将数据赋值到对应的对话框的指定位置
+                        if(n=='note'){
+                            $("#EditUserModal textarea[name='"+ n +"']").val(v)
+                        }else{
+                            $("#EditUserModal input[name='"+ n +"']").val(v)
+                        }
+                    });
+                })
+            }
+
+        $('#BtnEditSave').click(function(){
+            postData={};
+            var uid = $('#uid').val();
+            postData['uid']=uid;
+            var name = $('#uname').val();
+            postData['name']=name;
+            var email = $('#uemail').val();
+            postData['email']=email;
+            var mobile = $('#umobile').val();
+            postData['mobile']=mobile;
+            var wiexin  = $('#uwiexin').val();
+            postData['wiexin']=wiexin;
+            console.log(postData);
+            $.ajax({
+                url: '/UserManage_edit_Json/',
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if (data.status) {
+                        window.location.reload()
+                    } else {
+                        $('#user_errorMsg').text(data.message);
+{#                        alert(data.message)#}
+                    }
+                }
+            })
+        })
+
+
+    </script>
+
+{% endblock %}

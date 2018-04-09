@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+
+{% block title %}
+     服务器信息
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="center">
+            <a class="btn btn-success" id="btnaddserv">添加</a>
+            <a class="btn btn-info" id="btnAll">全 选</a>
+            <a class="btn btn-info" id="btnreverse">反 选</a>
+            <a class="btn btn-info" id="btncall">取 消</a>
+            <a class="btn btn-success" id="servercheck">巡检</a>
+
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>服务器名称</th>
+                        <th>服务器用户</th>
+                        <th>服务器密码</th>
+                        <th>服务器管理IP</th>
+                        <th>服务器所属业务线</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tb">
+                {% for row in serv_list %}
+                    <tr nid="{{ row.id }}">
+                        <td><input type="checkbox" name="checkbox" hl="{{ row.id }}"></td>
+                        <td na="nid" style="display: none">{{ row.id }}</td>
+                        <td na="name">{{ row.hostname }}</td>
+                        <td na="user">{{ row.hostuser }}</td>
+                        <td na="pwd">{{ row.hostpwd }}</td>
+                        <td na="ip">{{ row.hostIP }}</td>
+
+                        <td na="port" style="display: none">{{ row.hostport }}</td>
+                        <td na="tag" style="display: none">{{ row.hosttag }}</td>
+                        <td na="sqluser" style="display: none">{{ row.sqluser }}</td>
+                        <td na="sqlpwd" style="display: none">{{ row.sqlpwd }}</td>
+
+                        <td na="cls_id" cid="{{ row.business_id }}">{{ row.business.name }}</td>
+                        <td><a style="font-size: 25px" class="glyphicon glyphicon-trash del-row"></a>
+                            <a style="font-size: 25px" class="glyphicon glyphicon-pencil edit-row"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="center alert alert-success" role="alert" style="display: none" id="success1">
+            <p id="message"></p>
+        </div>
+        <div class="center alert alert-danger" role="alert" style="display: none" id="success2">
+            <p id="cboxerror"></p>
+        </div>
+
+        <!-- Modal start add user-->
+        <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">增加服务器</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器名称</label>
+                                <div class="col-sm-8">
+                                <input id="sname" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器用户</label>
+                                <div class="col-sm-8">
+                                <input id="suser" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器密码</label>
+                                <div class="col-sm-8">
+                                <input id="spwd" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器管理IP</label>
+                                <div class="col-sm-8">
+                                <input id="sip" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器端口</label>
+                                <div class="col-sm-8">
+                                <input id="sport" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务标签</label>
+                                <div class="col-sm-8">
+                                <input id="stag" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">sql用户</label>
+                                <div class="col-sm-8">
+                                <input id="ssuser" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">sql密码</label>
+                                <div class="col-sm-8">
+                                <input id="sspwd" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-3 control-label">所属业务</label>
+                                <div class="col-sm-8 center">
+                                    <select id="sels">
+                                        {% for i in business_list %}
+                                            <option selop="{{ i.id }}">{{ i.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="ServErrorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnSave">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end add user-->
+
+        <!-- Modal start del server-->
+        <div class="modal fade" id="delModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="alert alert-danger" role="alert">
+                    <h3 style="text-align: center">确定要删除该服务器吗？</h3>
+                    <div id="delNid">......</div>
+                    <div style="text-align: center">
+                        <button id="cacle" type="button" class="btn btn-primary">取消</button>
+                        <button id="delConfirm" type="button" class="btn btn-danger">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end del server-->
+
+        <!-- Modal edit server-->
+        <div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel" style="text-align: center">编辑服务器</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal">
+                            <input id="eid" name="nid" style="display: none">
+                            <div class="form-group center">
+
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器名称</label>
+                                <div class="col-sm-8">
+                                <input name="name" id="ename" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器用户</label>
+                                <div class="col-sm-8">
+                                <input name="user" id="euser" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器密码</label>
+                                <div class="col-sm-8">
+                                <input name="pwd" id="epwd" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器管理IP</label>
+                                <div class="col-sm-8">
+                                <input name="ip" id="eip" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务器端口</label>
+                                <div class="col-sm-8">
+                                <input name="port" id="eport" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">服务标签</label>
+                                <div class="col-sm-8">
+                                <input name="tag" id="etag" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">sql用户</label>
+                                <div class="col-sm-8">
+                                <input name="sqluser" id="esuser" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group center">
+                                <label for="inputPassword3" class="col-sm-3 control-label">sql密码</label>
+                                <div class="col-sm-8">
+                                <input name="sqlpwd" id="espwd" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-3 control-label">所属业务</label>
+                                <div class="col-sm-8 center">
+                                    <select name="cls_id">
+                                        {% for i in business_list %}
+                                            <option value="{{ i.id }}" >{{ i.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <span id="EditErrorMsg" style="color: red"></span>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                        <button type="button" class="btn btn-primary" id="btnEditSave">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal end edit server-->
+
+    </div>
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+
+    <script>
+
+        $(function () {
+                bindEdit();
+            });
+
+        $('#btnAll').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', true);
+                {#                var host = $(this).prop('checked',true).attr('hl');#}
+                {#                console.log(host);#}
+                {#                hlist+=(host)#}
+            });
+        });
+
+        $('#btncall').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', false);
+            });
+        });
+
+        $('#btnreverse').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                if ($(this).prop('checked')) {
+                    $(this).prop('checked', false);
+                } else {
+                    $(this).prop('checked', 'true');
+                }
+            });
+
+        });
+
+        $('#servercheck').click(function () {
+            $('#message').empty();
+            $('#cboxerror').empty();
+            postData = {};
+            //判断主机状态的命令
+            cmd = 'hostname';
+            postData['cmd']=cmd;
+            //判断主机是否被选中
+            console.log($("input[type='checkbox']").prop('checked'));
+            if($("input[type='checkbox']").prop('checked')){
+
+            }else{
+                alert('请先选中主机在进行巡检')
+            }
+            //获取选中的主机
+            $('#tb').find(':checked').each(function () {
+                postData['hosts'] = $(this).attr('hl');
+                console.log(postData);
+                //发送数据到后端
+                $.ajax({
+                    url:'/Server_CheckJson/',
+                    data:postData,
+                    type:'POST',
+                    success:function(args){
+                        console.log(args);
+                        var data = JSON.parse(args);
+                        if(data.status){
+                            $('#success1').show();
+{#                            $('#message').append("<li id='msg1'>"+data.message+"</li>");#}
+                            $('#message').append("<p id='msg1'>"+data.message+"</p>");
+                        }else{
+                            $('#success2').show();
+                            $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                    })
+                });
+        });
+
+        $('#btnaddserv').click(function () {
+            $('#userModal').modal('show')
+        });
+
+        $('#btnSave').click(function () {
+            postData={};
+            //获取服务器数据
+            var sname = $('#sname').val();
+            postData['sname']=sname;
+            var suser = $('#suser').val();
+            postData['suser']=suser;
+            var spwd = $('#spwd').val();
+            postData['spwd']=spwd;
+            var sip = $('#sip').val();
+            postData['sip']=sip;
+            var sport = $('#sport').val();
+            postData['sport']=sport;
+            var stag = $('#stag').val();
+            postData['stag']=stag;
+            var ssuser = $('#ssuser').val();
+            postData['ssuser']=ssuser;
+            var sspwd = $('#sspwd').val();
+            postData['sspwd']=sspwd;
+            var sbusid = $('#sels').find("option:selected").attr('selop');
+            postData['sbusid']=sbusid;
+            console.log(postData);
+            //发送到后端
+            $.ajax({
+                url: "/Server_SaveUserJson/",
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    data=JSON.parse(arg);
+                    if(data.status){
+                        window.location.reload()
+                    }else{
+                        $('#ServErrorMsg').text(data.message)
+                    }
+                }
+            })
+
+        });
+
+        $('.del-row').click(function () {
+            //调用警告框
+            $('#delModal').modal('show');
+                 //获取当前行的ID
+                var cid = $(this).parent().parent().attr('nid');
+                //设置给delNid
+                $('#delNid').val(cid);
+                console.log(cid)
+        });
+
+        $('#delConfirm').click(function () {
+            var csid = $('#delNid').val();
+            console.log(csid);
+            $.ajax({
+                url:'/Server_Del_ServerJson/',
+                type:'POST',
+                data:{'nid':csid},
+                success: function (arg) {
+                    console.log(arg);
+                    data = JSON.parse(arg);
+                    if(data.status){
+                        $('#delModal').modal('hide');
+                        window.location.reload();
+                    }else{
+                        alert(data.message)
+                    }
+                }
+            })
+        });
+
+        $('#cacle').click(function(){
+            $('#delModal').modal('hide');
+        });
+
+        function bindEdit(){
+            //使用委托的方式
+            $('#tb').on('click','.edit-row',function(){
+                $('#EditModal').modal('show');
+                //获取当前行的所有数据
+                $(this).parent().prevAll().each(function(){
+                    var v = $(this).text();
+                    var n = $(this).attr('na');
+{#                    console.log(v);#}
+{#                    console.log(n);#}
+                    //将数据赋值到对应的对话框的指定位置
+                    if(n=='cls_id'){
+                        var cid = $(this).attr('cid');
+                        console.log(cid);
+                        $("#EditModal select[name='cls_id']").val(cid);
+                    }else{
+                        $("#EditModal input[name='"+ n +"']").val(v);
+                    }
+                });
+            })
+        }
+
+        $('#btnEditSave').click(function () {
+            postData={};
+            $('#EditModal').find('input,select').each(function () {
+                var v = $(this).val();
+                var n = $(this).attr('name');
+                postData[n] = v;
+            });
+            console.log(postData);
+            $.ajax({
+                url:'/Server_Edit_ServerJson/',
+                type:'POST',
+                data:postData,
+                success: function (arg) {
+                    data=JSON.parse(arg);
+                    if(data.status){
+                        window.location.reload()
+                    }else{
+                        console.log(data.message);
+                        $('#EditErrorMsg').text(data.message)
+                    }
+
+                }
+            })
+        })
+
+    </script>
+
+{% endblock %}

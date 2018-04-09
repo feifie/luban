@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    代码发布
+
+    通过服务器标签选择服务器
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="container" style="min-width: 800px;min-height: 600px">
+        <div>
+            <h3 class="center">执行SQL</h3>
+            <div class="center">
+                <div>
+                    <a class="btn btn-info btn-sm" disabled="disabled" >选择SQL代码</a>
+                    <select id="allselect">
+                    {% for s in sql_list %}
+                        <option sqid="{{ s.id }}">{{ s.name }}</option>
+                    {% endfor %}
+                    </select>
+                    <a class="btn btn-info btn-sm" disabled="disabled" >选择SQL服务器</a>
+                    <select id="hostselect">
+                    {% for h in host_db_list %}
+                        <option hsid="{{ h.id }}">{{ h.hostname }}</option>
+                    {% endfor %}
+                    </select>
+                    <a class="btn btn-info btn-sm" id="btnbacksql">备份数据库</a>
+                    <a class="btn btn-info btn-sm" id="btnsqlrun">执行SQL</a>
+                </div>
+            </div>
+            <div style="width: 300px;height: 50px">
+{#                显示信息#}
+            </div>
+
+        </div>
+
+
+            <div>
+            <h3 class="center">选择代码</h3>
+            </div>
+
+            <div class="center">
+                <a class="btn btn-info btn-sm" disabled="disabled" >选择代码</a>
+                <select id="codeselect">
+                    {% for c in code_list %}
+                    <option cid="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                <a class="btn btn-info btn-sm" id="btnAll">全 选</a>
+                <a class="btn btn-info btn-sm" id="btnreverse">反 选</a>
+                <a class="btn btn-info btn-sm" id="btncall">取 消</a>
+                <a class="btn btn-info btn-sm" id="sendAll">批量上线</a>
+                <a class="btn btn-info btn-sm" id="cmdrun">重启web</a>
+            </div>
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>选项</th>
+                        <th>服务器名称</th>
+                        <th>服务器标签</th>
+                        <th>业务线</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tb">
+                    {% for row in host_list %}
+                        <tr id="hall">
+                            <td><input type="checkbox" name="checkbox" hl="{{ row.id }}"></td>
+                            <td>{{ row.hostname }}</td>
+                            <td>{{ row.hosttag }}</td>
+                            <td>{{ row.business.name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="center alert alert-success" role="alert" style="display: none" id="success1">
+                <p id="message"></p>
+            </div>
+            <div class="alert alert-danger" role="alert" style="display: none" id="success2">
+                <p id="cboxerror"></p>
+            </div>
+        <div>
+        </div>
+
+    </div>
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+            $('#btnAll').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', true);
+                });
+            });
+
+            $('#btncall').click(function () {
+                $('#tb').find(':checkbox').each(function () {
+                    $(this).prop('checked', false);
+                });
+            });
+
+            $('#btnreverse').click(function () {
+                $('#tb').find(':checkbox').each(function () {
+                    if ($(this).prop('checked')) {
+                        $(this).prop('checked', false);
+                    } else {
+                        $(this).prop('checked', 'true');
+                    }
+                });
+
+            });
+
+            //批量上线
+            $('#sendAll').click(function () {
+                $('#success1').css('display','none');
+                $('#success2').css('display','none');
+                $('#message').empty();
+                $('#cboxerror').empty();
+                postData = {};
+                //获取选中的代码id
+                var cid = $("#codeselect").find("option:selected").attr('cid');
+                postData['cid']=cid;
+                //获取选中的主机
+                $('#tb').find(':checked').each(function () {
+                    postData['hosts'] = $(this).attr('hl');
+                console.log(postData);
+                //将数据发送到后台
+                    $.ajax({
+                        url: '/Send_CodesJsonRelease/',
+                        type: 'POST',
+                        data: postData,
+                        success: function(args){
+                            console.log(args);
+                            var data = JSON.parse(args);
+                            if(data.status){
+                                $('#success1').show();
+                                $('#message').append("<li id='msg1'>"+data.message+"</li>");
+                            }else{
+                                $('#success2').show();
+                                $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                    })
+                })
+            });
+
+            //重启nginx
+            $('#cmdrun').click(function(){
+                $('#success1').css('display','none');
+                $('#success2').css('display','none');
+                $('#message').empty();
+                $('#cboxerror').empty();
+                postData = {};
+                //获取选中的主机
+                $('#tb').find(':checked').each(function () {
+                    postData['hosts'] = $(this).attr('hl');
+                console.log(postData);
+                //将数据发送到后台
+                    $.ajax({
+                        url: '/Send_CodesJsonRestartNginx/',
+                        type: 'POST',
+                        data: postData,
+                        success: function(args){
+                            console.log(args);
+                            var data = JSON.parse(args);
+                            if(data.status){
+                                $('#success1').show();
+                                $('#message').append("<li id='msg1'>"+data.message+"</li>");
+                            }else{
+                                $('#success2').show();
+                                $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                    })
+                })
+            });
+
+            //备份数据库 未完成。。。。。。。。。。。。
+            $('#btnbacksql').click(function () {
+                //获取mysql服务器id
+                var hids = $("#hostselect").find("option:selected").attr("hsid");
+                console.log(hids);
+                //发送到后端进行数据库备份：
+                $.ajax({
+                    url: '/Send_Back_SqlJson/',
+                    type: 'POST',
+                    data: {hid:hids},
+                    success: function (arg) {
+                        data = JSON.parse(arg);
+                        if(data.status){
+                            console.log(data.message)
+                        }else{
+                            console.log(data.message)
+                        }
+                    }
+                })
+            });
+
+            //执行sql
+            $('#btnsqlrun').click(function () {
+                alert('2')
+            });
+
+    </script>
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

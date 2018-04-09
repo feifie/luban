@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    部署信息
+{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+        <div>
+            {#        <a class="btn btn-danger">执行部署</a>#}
+        </div>
+
+        <div class="center">
+            <label style="color: #00be67">选择软件</label>
+
+            <select id="sf">
+                {% for i in serv_type %}
+{#                    #<option sid="{{ i.id }}" cmd="{{ i.commands }}" sof="{{ i.software }}">{{ i.name }}</option>#}
+                    <option sid="{{ i.id }}" cmd="{{ i.commands }}" sof="{{ i.softname }}">{{ i.name }}</option>
+                {% endfor %}
+            </select>
+            <label>选择主机</label>
+            <select id="host">
+                {% for i in serv_list %}
+                    <option hid="{{ i.id }}">{{ i.hostname }}</option>
+                {% endfor %}
+            </select>
+            <a class="btn btn-info" id="btnsend">传送软件</a>
+            <a class="btn btn-danger" id="btnrun">执行部署</a>
+        </div>
+        <div id="callback">
+            <span id="errorMsg" style="color: red"></span>
+        </div>
+
+        <div>
+            {#            <div class="progress" style="display: none">#}
+            {#                <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"#}
+            {#                     style="width: 10%;">#}
+            {#                </div>#}
+            {#            </div>#}
+        </div>
+        <div class="alert alert-block alert-success">
+            <span></span>
+
+        </div>
+        <div class="center">
+            <a class="btn btn-info" id="btnAll">全 选</a>
+            <a class="btn btn-info" id="btnreverse">反 选</a>
+            <a class="btn btn-info" id="btncall">取 消</a>
+            <a class="btn btn-info" id="fileadd">选择软件</a>
+
+            <select id="allselect">
+                {% for sf in serv_type %}
+                <option sfid="{{ sf.id }}">{{ sf.name }}</option>
+                {% endfor %}
+            </select>
+            <a class="btn btn-info" id="sendAll">批量分发</a>
+            <a class="btn btn-info" id="selscript">选择脚本</a>
+            <a class="btn btn-info" id="cmdrun">命令执行</a>
+        </div>
+        <div>
+            <table class="table table-bordered">
+                <thead>
+                <tr>
+                    <th>选项</th>
+                    <th>服务器名称</th>
+                    <th>业务线</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody id="tb">
+                {% for row in serv_list %}
+                    <tr id="hall">
+                        <td><input type="checkbox" name="checkbox" hl="{{ row.id }}"></td>
+                        <td>{{ row.hostname }}</td>
+                        <td>{{ row.business.name }}</td>
+                        <td><a style="font-size: 25px" class="glyphicon glyphicon-trash del-row"></a>
+                            <a style="font-size: 25px" class="glyphicon glyphicon-pencil edit-row"></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="center alert alert-success" role="alert" style="display: none" id="success1">
+                <p id="message"></p>
+            </div>
+            <div class="alert alert-danger" role="alert" style="display: none" id="success2">
+                <p id="cboxerror"></p>
+            </div>
+
+            <!-- Modal add script-->
+            <div class="modal fade" id="scriptModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel" style="text-align: center">选择要执行的工具</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--表单-->
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label">软件</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" id="selejid">
+                                            {% for t in t_list %}
+                                                <option jid="{{ t.id }}">{{ t.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <span id="errorMsg" style="color: red"></span>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                            <button type="button" class="btn btn-danger" id="Btnrun">执行脚本</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end idc-->
+
+            <!-- Modal add idc-->
+            <div class="modal fade" id="fileModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel" style="text-align: center">选择要分发的软件</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--表单-->
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label">软件</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control">
+                                            {% for sf in serv_type %}
+                                                <option>{{ sf.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <span id="errorMsg" style="color: red"></span>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                            <button type="button" class="btn btn-primary" id="btnSave">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end idc-->
+
+            <!-- Modal cmd run-->
+            <div class="modal fade" id="cmdModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel" style="text-align: center">请输入要执行的命令</h4>
+                        </div>
+                        <div class="modal-body">
+
+                            <!--表单-->
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="inputPassword3" class="col-sm-2 control-label">cmd</label>
+                                    <div class="col-sm-10">
+                                    <input id="cmds" type="text" placeholder="可以输入多个命令，使用逗号或&&隔开" style="width: 400px">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <span id="errorMsg" style="color: red"></span>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" id="quit">取消</button>
+                            <button type="button" class="btn btn-primary" id="CmdRun">确定执行</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal end cmd-->
+
+        </div>
+
+    </div>
+
+
+
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+            bindFiler();
+
+        });
+
+        function bindFiler() {
+            $("#fileadd").click(function () {
+                $('#fileModal').modal('show');
+
+            })
+        }
+
+        $('#btnrun').click(function () {
+            var host = $("#host").find("option:selected").val();
+            //var filepath = $("#sf").find("option:selected").attr('sof');
+            postData = {};
+            var sid = $("#sf").find("option:selected").attr('sid');
+            var hid = $("#host").find("option:selected").attr("hid");
+            var cmd = $("#sf").find("option:selected").attr('cmd');
+            //sid 软件；hid：主机； cmd：命令
+            //alert(cmd)
+            //alert(hid)
+            //软件路径
+            //alert(filepath);
+            postData['software'] = sid;
+            postData['server'] = hid;
+            postData['cmd'] = cmd;
+            //console.log(postData)
+            $.ajax({
+                url: '/run-server/',
+                type: 'POST',
+                data: postData,
+                success: function (arg) {
+                    console.log(arg);
+                    var dict = JSON.parse(arg); //将字符串arg转换为字典
+                    if (dict.status) {
+                        {#                        $('#callback:parent').remove();#}
+                        $('#callback').append('<lable style="color: red">主机[' + host + ']执行结果:' + dict.status + '</lable>');
+                        $('#callback').append('<textarea class="form-control" rows="3">' + dict.message + '</textarea>');
+                        //window.location.reload(); //刷新页面
+                    } else {
+                        $('#errorMsg').text(dict.message)
+                    }
+                }
+            })
+
+        });
+
+        $('#btnsend').click(function () {
+            postRemoteDate = {};
+            var filename = $("#sf").find("option:selected").attr('sof');
+            var hid = $("#host").find("option:selected").attr("hid");
+            var sid = $("#sf").find("option:selected").attr('sid');
+            postRemoteDate['softw'] = filename;
+            postRemoteDate['remothid'] = hid;
+            postRemoteDate['sid'] = sid;
+            console.log(postRemoteDate);
+            $.ajax({
+                url: '/send-remoteserver/',
+                data: postRemoteDate,
+                type: 'POST',
+                success: function (arg) {
+                    console.log(arg);
+                    var dict = JSON.parse(arg);
+                    if (dict.status) {
+                        alert(dict.message)
+                    }
+
+                }
+            })
+        });
+
+        $('#btnAll').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', true);
+            });
+        });
+
+        $('#btncall').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                $(this).prop('checked', false);
+            });
+        });
+
+        $('#btnreverse').click(function () {
+            $('#tb').find(':checkbox').each(function () {
+                if ($(this).prop('checked')) {
+                    $(this).prop('checked', false);
+                } else {
+                    $(this).prop('checked', 'true');
+                }
+            });
+
+        });
+
+        $('#sendAll').click(function () {
+            $('#message').empty();
+            $('#cboxerror').empty();
+            host_list = {};
+            // 获取软件id
+            var sfid = $("#allselect").find("option:selected").attr('sfid');
+            //if(sfid)
+            //获取选中的主机id
+            host_list['sfid']=sfid;
+            $('#tb').find(':checked').each(function () {
+                host_list['hosts'] = $(this).attr('hl');
+            console.log(host_list);
+
+            //发送数据到后台
+                $.ajax({
+                    url:'/Batch_execution/',
+                    data:host_list,
+                    type:'POST',
+                    success:function(args){
+                        console.log(args);
+                        var data = JSON.parse(args);
+                        if (data.status){
+                            $('#success1').show();
+                            $('#message').append("<li id='msg1'>"+data.message+"</li>");
+
+                        }else{
+                            //$('#cboxerror').text(data.message);
+{#                            for(i = 0; i<data.message.length; i++){#}
+{#                                var err = data.message[i];#}
+
+                            //$('#cboxerror').empty();
+                            $('#success2').show();
+                            $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+
+                            }
+                        }
+                })
+            })
+        });
+
+        $('#selscript').click(function(){
+            $('#message').empty();
+            $('#cboxerror').empty();
+            if($("input[type='checkbox']").prop('checked')){
+                $('#scriptModal').modal('show');
+            }else{
+                alert('请先选中主机在进行操作')
+            }
+        });
+
+        $('#Btnrun').click(function () {
+            $('#scriptModal').modal('hide');
+            $('#message').empty();
+            $('#cboxerror').empty();
+            host_list = {};
+            //获取脚本文件id
+            var jid = $('#selejid').find("option:selected").attr('jid');
+            //console.log(jid);
+            //获取选中的主机id
+            host_list['jid']=jid;
+            $('#tb').find(':checked').each(function () {
+                host_list['hosts'] = $(this).attr('hl');
+                //加判断如果为空，不能执行
+                console.log(host_list);
+                //发送数据到后端
+                $.ajax({
+                    url:'/Run_script/',
+                    data:host_list,
+                    type:'POST',
+                    success:function(args){
+                        console.log(args);
+                        var data = JSON.parse(args);
+                        if(data.status){
+                            $('#success1').show();
+                            $('#message').append("<li id='msg1'>"+data.message+"</li>");
+                        }else{
+                            $('#success2').show();
+                            $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                    })
+                });
+        });
+
+        $('#cmdrun').click(function () {
+            $('#message').empty();
+            $('#cboxerror').empty();
+            if($("input[type='checkbox']").prop('checked')){
+                 //调用模态对话框
+                $('#cmdModal').modal('show')
+            }else{
+                alert('请先选中主机在进行操作')
+            }
+        });
+
+        $('#CmdRun').click(function(){
+            $('#cmdModal').modal('hide');
+            $('#message').empty();
+            $('#cboxerror').empty();
+            host_list = {};
+            //获取命令：
+            var cmds = $('#cmds').val();
+            host_list['cmd']=cmds;
+            $('#tb').find(':checked').each(function () {
+                host_list['hosts'] = $(this).attr('hl');
+                //加判断如果为空，不能执行
+                console.log(host_list);
+                //发送数据到后端
+                $.ajax({
+                    url:'/AllRun_CmdShell/',
+                    data:host_list,
+                    type:'POST',
+                    success:function(args){
+                        console.log(args);
+                        var data = JSON.parse(args);
+                        if(data.status){
+                            $('#success1').show();
+{#                            var arr = data.message;JSON.stringify(arr);#}
+{#                            $.each(arr,function(index,value){#}
+{#                                alert(value);#}
+{#                            });#}
+                            $('#message').append("<li id='msg1'>"+data.message+"</li>");
+                        }else{
+                            $('#success2').show();
+                            $('#cboxerror').append("<li id='msg2'>" + data.message + "</li>");
+                            }
+                        }
+                    })
+                });
+        });
+
+
+    </script>
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
