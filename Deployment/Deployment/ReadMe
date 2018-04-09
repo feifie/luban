@@ -109,10 +109,6 @@ server {
         #alias /data/Django/Deployment/static;
     }
 
-    location /CodeDB  {
-        alias /data/Django/Deployment/CodeDB;
-    }
-
     # Load configuration files for the default server block.
     include /etc/nginx/default.d/*.conf;
 
