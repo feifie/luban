@@ -138,6 +138,13 @@ tar nginx
 nginx -t
 service nginx start
 
+
+配置开机启动
+vim /etc/rc.d/rc.local 
+增加uwsgi开机启动
+/data/python3/bin/uwsgi /data/Django/Deployment/script/django_uwsgi.ini &
+
+
 配置完成！
 
 
